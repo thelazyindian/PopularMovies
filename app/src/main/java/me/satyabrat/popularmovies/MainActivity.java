@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     String API_KEY = "bf2120b7d08178b1c99134733cd4e5ae";
     String BASE_URL = "https://api.themoviedb.org/";
-    public static String IMG_BASE_URL = "https://image.tmdb.org/t/p/w500";
+    public static String IMG_BASE_URL = "https://image.tmdb.org/t/p/w300";
     ProgressDialog pDialog;
 
     List<Movie.ResultsBean> Movies;
@@ -41,19 +42,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-
-        OkHttpClient okClient = new OkHttpClient.Builder()
-                .addInterceptor(
-                        new Interceptor() {
-                            @Override
-                            public okhttp3.Response intercept(Chain chain) throws IOException {
-                                Request request = chain.request().newBuilder()
-                                        .addHeader("Accept", "Application/JSON").build();
-
-                                return chain.proceed(request);
-                            }
-                        }
-                ).build();
 
         pDialog = new ProgressDialog(this);
         pDialog.setMessage("Please Wait...");
@@ -77,6 +65,10 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+        if (id == R.id.action_refresh) {
+            getMovieDetails();
+        }
+
         if (id == R.id.action_settings) {
             return true;
         }
@@ -87,8 +79,23 @@ public class MainActivity extends AppCompatActivity {
     private void getMovieDetails() {
 
         pDialog.show();
+
+        OkHttpClient okClient = new OkHttpClient.Builder()
+                .addInterceptor(
+                        new Interceptor() {
+                            @Override
+                            public okhttp3.Response intercept(Chain chain) throws IOException {
+                                Request request = chain.request().newBuilder()
+                                        .addHeader("Accept", "Application/JSON").build();
+
+                                return chain.proceed(request);
+                            }
+                        }
+                ).build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
+                .client(okClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -113,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Movie> call, Throwable t) {
                 pDialog.hide();
+                Toast.makeText(getApplicationContext(), "NETWORK ERROR", Toast.LENGTH_LONG).show();
             }
         });
     }

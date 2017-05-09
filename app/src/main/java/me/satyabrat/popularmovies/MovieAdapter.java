@@ -1,6 +1,7 @@
 package me.satyabrat.popularmovies;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,9 +23,11 @@ import static me.satyabrat.popularmovies.MainActivity.IMG_BASE_URL;
 public class MovieAdapter extends RecyclerView.Adapter <MovieAdapter.MyViewHolder> {
 
     List<Movie.ResultsBean> results;
+    private String LOG_TAG;
 
     public MovieAdapter(List<Movie.ResultsBean> results) {
         this.results = results;
+        LOG_TAG = MovieAdapter.class.getSimpleName();
     }
 
     @Override
@@ -39,7 +42,11 @@ public class MovieAdapter extends RecyclerView.Adapter <MovieAdapter.MyViewHolde
 
         holder.title.setText(results.get(position).getOriginal_title());
         String imageUrl = IMG_BASE_URL + results.get(position).getPoster_path();
-        Picasso.with(holder.poster.getContext()).load(imageUrl).into(holder.poster);
+        Log.v(LOG_TAG, imageUrl);
+        Picasso.with(holder.poster.getContext())
+                .load(imageUrl)
+                .error(R.drawable.error)
+                .into(holder.poster);
 
     }
 
